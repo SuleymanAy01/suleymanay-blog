@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const modules = import.meta.glob('../content/blog/*.md', { eager: true });
+const posts = Object.values(modules).map((post: any) => ({
+  id: post.file.split('/').pop().replace('.md', ''),
+  title: post.frontmatter.title,
+  description: post.frontmatter.description,
+  category: post.frontmatter.category,
+  date: post.frontmatter.date,
+  url: post.url,
+}));
+
+const categories = [
+  { name: 'Bilim', slug: 'bilim' },
+  { name: 'Tarih', slug: 'tarih' },
+  { name: 'Biyografi', slug: 'biyografi' },
+  { name: 'Teknoloji', slug: 'teknoloji' },
+  { name: 'Felsefe', slug: 'felsefe' },
+  { name: 'Kültür / Sanat', slug: 'kultur-sanat' },
+];
+---
+<BaseLayout title="Ana Sayfa">
+  <section class="hero">
+    <span class="eyebrow">Selam</span>
+    <h1>Selam, merakın iz sürdüğü, kelimelerin anlam bulduğu yere hoş geldin.</h1>
+    <p>Bazen bir sorunun peşinden yürürsün; yol seni tarihin sessizliğine, bilimin sonsuzluğuna ve insanın kendisine çıkar.</p>
+  </section>
+
+  <section class="section" aria-labelledby="featured-title">
+    <div class="section-head"><h2 id="featured-title" class="section-title">Öne Çıkanlar</h2></div>
+    {posts.length >= 3 ? (
+      <div class="featured-stage" id="featuredStage">
+        {posts.map((post, index) => (
+          <article class="featured-card" data-post-id={post.id} data-index={index}>
+            <span class="eyebrow">{post.category}</span>
+            <h3><a href={post.url}>{post.title}</a></h3>
+            <p>{post.description}</p>
+            <a class="card-link" href={post.url}>Yazıyı oku</a>
+          </article>
+        ))}
+      </div>
+    ) : <div class="empty-state">Öne çıkanlar, en az üç gerçek yazı yayınlandığında görüntülenecek.</div>}
+  </section>
+
+  <section class="section" aria-labelledby="recent-title">
+    <div class="section-head"><h2 id="recent-title" class="section-title">Son Yazılar</h2></div>
+    {posts.length ? (
+      <div class="recent-grid">
+        {posts.slice(0, 5).map((post) => (
+          <article class="post-card">
+            <span class="eyebrow">{post.category}</span>
+            <h3><a href={post.url}>{post.title}</a></h3>
+            <p>{post.description}</p>
+            <time>{post.date}</time>
+          </article>
+        ))}
+      </div>
+    ) : <div class="empty-state">Henüz yayınlanmış gerçek bir yazı bulunmuyor.</div>}
+  </section>
+
+  <section class="section" aria-labelledby="categories-title">
+    <div class="section-head"><h2 id="categories-title" class="section-title">Kategoriler</h2></div>
+    <div class="category-grid">
+      {categories.map((category) => (
+        <a class="category-card" href={`/kategori/${category.slug}`}>
+          <span data-lucide="book-open"></span>
+          <span>{category.name}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window.gsap) return;
+      const allCards = [...document.querySelectorAll('.featured-card')];
+      if (allCards.length < 3) return;
+      const views = JSON.parse(localStorage.getItem('postViews') || '{}');
+      const cards = allCards.sort((a,b) => (views[b.dataset.postId] || 0) - (views[a.dataset.postId] || 0)).slice(0,3);
+      allCards.forEach(card => { if (!cards.includes(card)) card.style.display = 'none'; });
+      const positions = [0, 1, 2];
+      const render = () => cards.forEach((card, i) => {
+        const pos = positions[i];
+        gsap.to(card, {
+          xPercent: pos === 0 ? -78 : pos === 2 ? 78 : 0,
+          scale: pos === 1 ? 1.08 : .84,
+          opacity: pos === 1 ? 1 : .58,
+          zIndex: pos === 1 ? 3 : 1,
+          duration: .9,
+          ease: 'power3.inOut'
+        });
+      });
+      render();
+      window.setInterval(() => { positions.push(positions.shift()); render(); }, 5000);
+    });
+    if (window.lucide) window.lucide.createIcons();
+  </script>
+
+  <style>
+    .hero { padding: 90px 0 110px; max-width: 940px; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 5.5rem); line-height: 1.12; margin: 18px 0 28px; letter-spacing: -.02em; }
+    .hero p { max-width: 760px; font-size: clamp(1.1rem, 2vw, 1.5rem); color: var(--muted); }
+    .section { margin: 0 0 92px; }
+    .featured-stage { position: relative; height: 410px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+    .featured-card { position: absolute; width: min(62%, 650px); min-height: 300px; padding: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .featured-card h3 { font-size: clamp(1.6rem, 3vw, 2.5rem); line-height: 1.25; margin: 12px 0; }
+    .featured-card h3 a, .post-card h3 a { text-decoration: none; }
+    .featured-card p, .post-card p { color: var(--muted); }
+    .card-link { color: var(--accent); text-underline-offset: 4px; }
+    .recent-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+    .post-card { padding: 22px; min-height: 250px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .post-card h3 { font-size: 1.25rem; line-height: 1.35; }
+    .post-card time { color: var(--muted); font-size: .8rem; }
+    .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .category-card { display: flex; align-items: center; gap: 14px; padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; transition: transform .25s ease, border-color .25s ease; }
+    .category-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .category-card svg { width: 22px; color: var(--accent); }
+    @media (max-width: 980px) { .recent-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 700px) { .featured-stage { height: 470px; } .featured-card { width: 82%; } .recent-grid, .category-grid { grid-template-columns: 1fr; } }
+  </style>
+</BaseLayout>

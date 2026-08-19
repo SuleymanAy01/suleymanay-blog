@@ -1,0 +1,28 @@
+backend:
+  name: github
+  repo: KULLANICI_ADI/REPO_ADI # Örn: suleymanay/suleymanay-blog
+  branch: main
+  base_url: https://suleymanay-blog.vercel.app # Vercel URL'iniz
+  auth_endpoint: api/auth
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "blog"
+    label: "Blog Yazıları"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Başlık", name: "title", widget: "string" }
+      - { label: "Yayın Tarihi", name: "date", widget: "datetime", format: "YYYY-MM-DD" }
+      - { 
+          label: "Kategori", 
+          name: "category", 
+          widget: "select", 
+          options: ["Bilim", "Tarih", "Biyografi"] 
+        }
+      - { label: "Kısa Özet", name: "description", widget: "text" }
+      - { label: "Kapak Görseli", name: "image", widget: "image", required: false }
+      - { label: "İçerik Metni", name: "body", widget: "markdown" }

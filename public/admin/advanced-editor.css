@@ -1,0 +1,40 @@
+.sa-native-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;margin:0 0 8px;border:1px solid #d8dce3;border-radius:8px;background:#f8fafc;font:13px system-ui;color:#46505a;position:relative;z-index:2}
+.sa-pencil-native{border:1px solid #8f765f;background:#fff8ee;color:#4b3625;border-radius:7px;padding:7px 12px;font-weight:600;cursor:pointer}
+.sa-pencil-native:hover{background:#f1e2cf}
+.sa-drawing-modal{position:fixed;inset:0;z-index:99999;background:rgba(8,10,14,.72);display:grid;place-items:center;padding:22px}
+.sa-drawing-box{width:min(1050px,96vw);background:#fbfaf7;border-radius:14px;box-shadow:0 30px 100px rgba(0,0,0,.35);padding:18px}
+.sa-drawing-head{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:12px;font-family:system-ui}
+.sa-drawing-head b{display:block;font-size:20px;color:#211b16}.sa-drawing-head small{display:block;color:#7b7065;margin-top:3px}
+.sa-drawing-actions{display:flex;gap:7px;flex-wrap:wrap}.sa-drawing-actions button,.sa-drawing-tools button{border:1px solid #d0c7bd;background:#fff;padding:8px 11px;border-radius:7px;cursor:pointer}.sa-drawing-actions .primary{background:#211b16;color:white;border-color:#211b16}
+.sa-drawing-tools{display:flex;gap:20px;align-items:center;padding:10px 0;font:12px system-ui}.sa-drawing-tools label{display:flex;align-items:center;gap:8px}
+.sa-canvas-wrap{height:min(62vh,620px);background:#fff;border:1px solid #d7d0c8;border-radius:10px;overflow:hidden}.sa-canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}
+.sa-drawing-note{font:11px system-ui;color:#81766c;padding-top:9px}
+
+.sa-pencil-toolbar-button{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 9px;margin-left:6px;border:1px solid #a56d25;border-radius:6px;background:#fff8ed;color:#6f4618;font:600 13px/1 system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.sa-pencil-toolbar-button:hover{background:#f3dfc3}
+html[data-admin-theme="dark"] .sa-pencil-toolbar-button{border-color:#c89452;background:#2a2119;color:#f4d3a2}
+html[data-admin-theme="dark"] .sa-pencil-toolbar-button:hover{background:#3a2c20}
+.sa-drawing-box{color:var(--sa-admin-text,#211b16)}
+html[data-admin-theme="dark"] .sa-drawing-box{background:#201c18;color:#f4eee7}
+html[data-admin-theme="dark"] .sa-drawing-head small,html[data-admin-theme="dark"] .sa-drawing-note{color:#b7aa9d}
+html[data-admin-theme="dark"] .sa-drawing-actions button,html[data-admin-theme="dark"] .sa-drawing-tools button{background:#2b2723;border-color:#4a4139;color:#f4eee7}
+html[data-admin-theme="dark"] .sa-drawing-actions .primary{background:#f0c48c;color:#211b16;border-color:#f0c48c}
+html[data-admin-theme="dark"] .sa-canvas-wrap{background:#fff;border-color:#5a5048}
+
+html[data-admin-theme="dark"] .sa-native-tools{background:#24201b;border-color:#453b31;color:#eee6d8}
+html[data-admin-theme="dark"] .sa-pencil-native{background:#2a2119;color:#f4d3a2;border-color:#c89452}
+html[data-admin-theme="dark"] .sa-drawing-modal{background:rgba(5,5,5,.78)}
+html[data-admin-theme="dark"] .sa-drawing-box{background:#1b1815;border:1px solid #453b31;color:#eee6d8}
+html[data-admin-theme="dark"] .sa-drawing-head b{color:#eee6d8}
+html[data-admin-theme="dark"] .sa-drawing-head small{color:#b2a99b}
+html[data-admin-theme="dark"] .sa-drawing-actions button,
+html[data-admin-theme="dark"] .sa-drawing-tools button{background:#24201b;color:#eee6d8;border-color:#4a4139}
+html[data-admin-theme="dark"] .sa-drawing-actions button:hover,
+html[data-admin-theme="dark"] .sa-drawing-tools button:hover{background:#302a24}
+html[data-admin-theme="dark"] .sa-drawing-tools input[type="range"]{accent-color:#d2a15c}
+html[data-admin-theme="dark"] .sa-canvas-wrap{background:#fff;border-color:#5a5048}
+
+/* Keçeli Kalem follows the admin theme without changing the white drawing canvas. */
+html[data-admin-theme="light"] .sa-drawing-box{background:#fbfaf6;color:#1b1916}
+html[data-admin-theme="light"] .sa-drawing-actions button,html[data-admin-theme="light"] .sa-drawing-tools button{background:#fff;color:#1b1916;border-color:#d8d0c1}
+html[data-admin-theme="light"] .sa-canvas-wrap{background:#fff;border-color:#d8d0c1}

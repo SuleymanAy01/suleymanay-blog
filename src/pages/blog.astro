@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const modules = import.meta.glob('../content/blog/*.md', { eager: true });
+const posts = Object.values(modules).map((post: any) => ({
+  id: post.file.split('/').pop().replace('.md', ''), title: post.frontmatter.title, description: post.frontmatter.description,
+  category: post.frontmatter.category, date: post.frontmatter.date, tags: post.frontmatter.tags || [], url: post.url,
+}));
+const categories = ['Bilim','Tarih','Biyografi','Teknoloji','Felsefe','Kültür / Sanat'];
+---
+<BaseLayout title="Blog">
+  <section class="blog-hero">
+    <span class="eyebrow">Arşiv</span><h1>Blog</h1>
+    <p>Bilimden tarihe, biyografiden felsefeye uzanan araştırma arşivi.</p>
+  </section>
+  {posts.length ? (
+    <>
+      <section class="featured-blog" id="blogFeatured">
+        <span class="eyebrow">Öne Çıkan Yazı</span>
+        <div id="featuredPost"></div>
+      </section>
+      <section class="toolbar">
+        <div class="filters" role="group" aria-label="Kategori filtreleri">
+          <button class="filter active" data-category="Tümü">Tümü</button>
+          {categories.map(c => <button class="filter" data-category={c}>{c}</button>)}
+        </div>
+        <input id="blogSearch" type="search" placeholder="Blogda ara..." aria-label="Blogda ara" />
+      </section>
+      <section id="postGrid" class="post-grid">
+        {posts.map(post => (
+          <article class="post-card" data-category={post.category} data-search={`${post.title} ${post.description} ${post.category} ${post.tags.join(' ')}`} data-date={post.date} data-id={post.id}>
+            <div class="card-top"><span class="eyebrow">{post.category}</span><button class="save" data-save={post.id} aria-label="Yazıyı kaydet"><span data-lucide="bookmark"></span></button></div>
+            <h2><a href={post.url}>{post.title}</a></h2><p>{post.description}</p><time>{post.date}</time>
+          </article>
+        ))}
+      </section>
+    </>
+  ) : <div class="empty-state">Henüz yayınlanmış gerçek bir yazı bulunmuyor.</div>}
+  <script is:inline define:vars={{ posts }}>
+    document.addEventListener('DOMContentLoaded', () => {
+      const readViews = () => JSON.parse(localStorage.getItem('postViews') || '{}');
+      const score = (p) => readViews()[p.id] || 0;
+      const ordered = [...posts].sort((a,b) => score(b)-score(a) || new Date(b.date).getTime()-new Date(a.date).getTime());
+      const featured = ordered[0];
+      const featuredEl = document.getElementById('featuredPost');
+      if (featured && featuredEl) featuredEl.innerHTML = `<h2><a href="${featured.url}">${featured.title}</a></h2><p>${featured.description}</p><a class="card-link" href="${featured.url}">Yazıyı oku</a>`;
+      const cards = [...document.querySelectorAll('.post-card')];
+      const normalize = (s) => s.toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      const apply = () => {
+        const active = document.querySelector('.filter.active')?.dataset.category || 'Tümü';
+        const q = normalize(document.getElementById('blogSearch')?.value || '');
+        cards.forEach(card => { const matchCat = active === 'Tümü' || card.dataset.category === active; const matchQ = !q || normalize(card.dataset.search).includes(q); card.hidden = !(matchCat && matchQ); });
+      };
+      document.querySelectorAll('.filter').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); apply(); }));
+      document.getElementById('blogSearch')?.addEventListener('input', apply);
+      document.querySelectorAll('[data-save]').forEach(btn => btn.addEventListener('click', () => {
+        const id = btn.dataset.save; const saved = JSON.parse(localStorage.getItem('savedPosts') || '[]'); const next = saved.includes(id) ? saved.filter(x=>x!==id) : [...saved,id]; localStorage.setItem('savedPosts', JSON.stringify(next)); btn.classList.toggle('saved', next.includes(id));
+      }));
+      if (window.lucide) window.lucide.createIcons();
+    });
+  </script>
+  <style>
+    .blog-hero { padding: 60px 0 45px; } .blog-hero h1 { font-size: clamp(3rem,7vw,6rem); margin: 10px 0; } .blog-hero p { color: var(--muted); font-size: 1.15rem; }
+    .featured-blog { padding: 42px; border:1px solid var(--border); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:34px; } .featured-blog h2 { font-size:clamp(2rem,4vw,4rem); line-height:1.15; margin:12px 0; } .featured-blog h2 a { text-decoration:none; }
+    .toolbar { display:flex; gap:18px; justify-content:space-between; align-items:center; margin-bottom:26px; flex-wrap:wrap; } .filters { display:flex; gap:8px; flex-wrap:wrap; } .filter { border:1px solid var(--border); background:transparent; color:var(--text); padding:9px 14px; border-radius:999px; cursor:pointer; } .filter.active,.filter:hover { background:var(--accent); color:#fff; border-color:var(--accent); } #blogSearch { width:min(360px,100%); border:1px solid var(--border); background:var(--surface); color:var(--text); padding:12px 16px; border-radius:999px; outline:none; }
+    .post-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; } .post-card { padding:24px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); min-height:280px; } .post-card[hidden]{display:none;} .card-top{display:flex;justify-content:space-between;align-items:center}.post-card h2{font-size:1.55rem;line-height:1.3}.post-card h2 a{text-decoration:none}.post-card p{color:var(--muted)} .post-card time{font-size:.8rem;color:var(--muted)} .save{border:0;background:transparent;color:var(--muted);cursor:pointer}.save svg{width:19px}.save.saved{color:var(--accent)} .card-link{color:var(--accent);}
+    @media(max-width:850px){.post-grid{grid-template-columns:1fr 1fr}} @media(max-width:600px){.post-grid{grid-template-columns:1fr}.featured-blog{padding:25px}}
+  </style>
+</BaseLayout>

@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const categories = [
+  ['bilim', 'Bilim'], ['tarih', 'Tarih'], ['biyografi', 'Biyografi'], ['teknoloji', 'Teknoloji'], ['felsefe', 'Felsefe'], ['kultur-sanat', 'Kültür / Sanat']
+];
+export function getStaticPaths() { return categories.map(([slug]) => ({ params: { category: slug } })); }
+const modules = import.meta.glob('../../content/blog/*.md', { eager: true });
+const { category } = Astro.params;
+const label = categories.find(([slug]) => slug === category)?.[1] || 'Kategori';
+const posts = Object.values(modules).map((post:any) => ({ id:post.file.split('/').pop().replace('.md',''), title:post.frontmatter.title, description:post.frontmatter.description, category:post.frontmatter.category, date:post.frontmatter.date, url:post.url })).filter((p:any)=>p.category===label).sort((a:any,b:any)=>new Date(b.date).getTime()-new Date(a.date).getTime());
+---
+<BaseLayout title={label}>
+  <section class="category-hero"><span class="eyebrow">Kategori</span><h1>{label}</h1><p>Bu kategoride yayınlanan araştırmalar.</p></section>
+  {posts.length ? <section class="category-grid">{posts.map((post:any)=><article class="category-post"><span class="eyebrow">{post.category}</span><h2><a href={post.url}>{post.title}</a></h2><p>{post.description}</p><time>{post.date}</time></article>)}</section> : <div class="empty-state">Bu kategoride henüz yayınlanmış gerçek bir yazı bulunmuyor.</div>}
+  <style>.category-hero{padding:60px 0 45px}.category-hero h1{font-size:clamp(3rem,7vw,6rem);margin:10px 0}.category-hero p{color:var(--muted)}.category-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.category-post{padding:26px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-height:270px}.category-post h2{font-size:1.7rem;line-height:1.25}.category-post h2 a{text-decoration:none}.category-post p{color:var(--muted)}.category-post time{font-size:.8rem;color:var(--muted)}@media(max-width:800px){.category-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.category-grid{grid-template-columns:1fr}}</style>
+</BaseLayout>

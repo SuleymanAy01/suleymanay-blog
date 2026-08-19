@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yönetim Paneli | Süleyman Ay</title>
+    
+    <!-- Config Bağlantısı -->
+    <link href="/config.yml" type="text/yaml" rel="cms-config-url" />
+    
+    <!-- Decap CMS Çekirdek Scripti -->
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  </head>
+  <body>
+    <script>
+      // CMS hazır olduğunda Keçeli Kalem düğmesini güvenli şekilde ekle
+      var checkCMS = setInterval(function() {
+        if (window.CMS) {
+          clearInterval(checkCMS);
+          window.CMS.registerEditorComponent({
+            id: "keceli-kalem",
+            label: "✒️ Keçeli Kalem",
+            fields: [
+              {
+                name: "text",
+                label: "Vurgulanacak Metin",
+                widget: "string"
+              }
+            ],
+            pattern: /^<mark class="keceli-kalem">(.*?)<\/mark>$/,
+            fromBlock: function(match) {
+              return { text: match[1] };
+            },
+            toBlock: function(obj) {
+              return '<mark class="keceli-kalem">' + (obj.text || '') + '</mark>';
+            },
+            toPreview: function(obj) {
+              return '<mark class="keceli-kalem">' + (obj.text || '') + '</mark>';
+            }
+          });
+        }
+      }, 100);
+    </script>
+  </body>
+</html>

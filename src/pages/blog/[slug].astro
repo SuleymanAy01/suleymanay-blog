@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const modules = import.meta.glob('../../content/blog/*.md', { eager: true });
+  return Object.values(modules).map((post:any) => ({ params:{slug:post.file.split('/').pop().replace('.md','')}, props:{post} }));
+}
+const { post } = Astro.props;
+const { Content } = post;
+const slug = post.file.split('/').pop().replace('.md','');
+const modules = import.meta.glob('../../content/blog/*.md', { eager: true });
+const all = Object.values(modules).map((p:any)=>({id:p.file.split('/').pop().replace('.md',''),title:p.frontmatter.title,category:p.frontmatter.category,date:p.frontmatter.date,url:p.url,description:p.frontmatter.description}));
+const others = all.filter(p=>p.id!==slug);
+const rawText = post.rawContent || '';
+const readingMinutes = Math.max(1, Math.ceil(rawText.trim().split(/\s+/).filter(Boolean).length / 200));
+const coverImage = post.frontmatter.image || null;
+---
+<BaseLayout title={post.frontmatter.title} description={post.frontmatter.description}>
+  <article class="article-page" data-post-id={slug}>
+    <header class={`article-hero${coverImage ? ' has-cover' : ''}`} style={coverImage ? `background-image:linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.18)),url(${coverImage})` : undefined}>
+      <div class="article-hero-inner">
+        <span class="eyebrow">{post.frontmatter.category}</span>
+        <h1>{post.frontmatter.title}</h1>
+        <div class="meta"><time>{post.frontmatter.date}</time><span>•</span><span>{readingMinutes} dk okuma</span><span>•</span><span><span id="viewCount">0</span> görüntülenme</span></div>
+      </div>
+    </header>
+
+    <div class="article-layout">
+      <div class="article-main">
+        <div class="article-actions">
+          <button id="saveBtn" class="action-btn" type="button"><span data-lucide="bookmark"></span> Kaydet</button>
+          <button id="copyBtn" class="action-btn" type="button"><span data-lucide="link"></span> Bağlantıyı kopyala</button>
+          <a class="action-btn" href={`https://wa.me/?text=${encodeURIComponent(post.frontmatter.title + ' ' + Astro.url.href)}`} target="_blank" rel="noreferrer"><span data-lucide="message-circle"></span> WhatsApp</a>
+          <a class="action-btn" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.frontmatter.title)}&url=${encodeURIComponent(Astro.url.href)}`} target="_blank" rel="noreferrer"><span data-lucide="twitter"></span> X</a>
+          <a class="action-btn" href={`https://t.me/share/url?url=${encodeURIComponent(Astro.url.href)}&text=${encodeURIComponent(post.frontmatter.title)}`} target="_blank" rel="noreferrer"><span data-lucide="send"></span> Telegram</a>
+          <button id="instagramBtn" class="action-btn" type="button"><span data-lucide="instagram"></span> Instagram</button>
+        </div>
+        <div class="article-content" id="articleContent"><Content /></div>
+        <div class="closing"><p>Bir sorunun peşinden çıktığın yol, bazen başka soruların kapısını aralar.</p></div>
+        <section class="last-posts"><div class="section-head"><h2 class="section-title">Son 3 Yazı</h2></div>{others.slice(0,3).map(p=><a class="last-post" href={p.url}><span class="eyebrow">{p.category}</span><strong>{p.title}</strong></a>)}</section>
+      </div>
+      <aside class="sidebar">
+        <div id="tocBox" class="side-box"><h2>İçindekiler</h2><nav id="toc"></nav></div>
+        <div class="side-box"><h2>Popüler 3 Yazı</h2><div id="popularPosts"></div></div>
+        <div class="side-box"><h2>3 Rastgele Yazı</h2><div id="randomPosts"></div></div>
+      </aside>
+    </div>
+  </article>
+  <script is:inline define:vars={{ postId:slug, allPosts:all }}>
+    document.addEventListener('DOMContentLoaded',()=>{
+      const id=postId; const now=Date.now(); const last=JSON.parse(localStorage.getItem('postViewWindows')||'{}'); const views=JSON.parse(localStorage.getItem('postViews')||'{}'); if(!last[id]||now-last[id]>=30*60*1000){views[id]=(views[id]||0)+1;last[id]=now;localStorage.setItem('postViews',JSON.stringify(views));localStorage.setItem('postViewWindows',JSON.stringify(last));} document.getElementById('viewCount').textContent=views[id]||0;
+      const saved=JSON.parse(localStorage.getItem('savedPosts')||'[]'); const save=document.getElementById('saveBtn'); if(saved.includes(id)) save.classList.add('saved'); save.addEventListener('click',()=>{const current=JSON.parse(localStorage.getItem('savedPosts')||'[]');const next=current.includes(id)?current.filter(x=>x!==id):[...current,id];localStorage.setItem('savedPosts',JSON.stringify(next));save.classList.toggle('saved',next.includes(id));});
+      document.getElementById('copyBtn').addEventListener('click',async()=>{await navigator.clipboard.writeText(location.href);document.getElementById('copyBtn').textContent='Bağlantı kopyalandı';}); document.getElementById('instagramBtn').addEventListener('click',async()=>{await navigator.clipboard.writeText(location.href);document.getElementById('instagramBtn').textContent='Bağlantı kopyalandı';});
+      const content=document.getElementById('articleContent'); const headings=[...content.querySelectorAll('h2,h3')]; const toc=document.getElementById('toc'); if(headings.length){headings.forEach((h,i)=>{h.id=h.id||`bolum-${i+1}`;const a=document.createElement('a');a.href=`#${h.id}`;a.textContent=h.textContent;a.dataset.target=h.id;toc.appendChild(a);});const observer=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){toc.querySelectorAll('a').forEach(a=>a.classList.toggle('active',a.dataset.target===e.target.id));}}),{rootMargin:'-20% 0px -65% 0px'});headings.forEach(h=>observer.observe(h));}else document.getElementById('tocBox').hidden=true;
+      const score=p=>{const v=JSON.parse(localStorage.getItem('postViews')||'{}');return v[p.id]||0}; const others=allPosts.filter(p=>p.id!==id); const popular=[...others].sort((a,b)=>score(b)-score(a)).slice(0,3); const random=[...others].sort(()=>Math.random()-.5).slice(0,3); const render=(el,list)=>{el.innerHTML=list.map(p=>`<a class="side-post" href="${p.url}"><span>${p.category}</span><strong>${p.title}</strong></a>`).join('')};render(document.getElementById('popularPosts'),popular);render(document.getElementById('randomPosts'),random);
+      content.querySelectorAll('img').forEach(img=>{img.loading='lazy';img.addEventListener('click',()=>{const images=[...content.querySelectorAll('img')];let i=images.indexOf(img);const box=document.createElement('div');box.className='lightbox';box.innerHTML=`<button class="lb-close">×</button><button class="lb-prev">‹</button><img src="${img.src}" alt="${img.alt||''}"><button class="lb-next">›</button>`;document.body.appendChild(box);const show=()=>box.querySelector('img').src=images[i].src;box.querySelector('.lb-close').onclick=()=>box.remove();box.querySelector('.lb-prev').onclick=()=>{i=(i-1+images.length)%images.length;show()};box.querySelector('.lb-next').onclick=()=>{i=(i+1)%images.length;show()};});});
+      if(window.lucide)window.lucide.createIcons();
+    });
+  </script>
+  <style>
+    .article-hero{min-height:440px;border:1px solid var(--border);border-radius:24px;background:linear-gradient(135deg,var(--surface),var(--surface-2));display:flex;align-items:end;margin:60px 0 38px;box-shadow:var(--shadow)}.article-hero-inner{padding:48px;max-width:900px}.article-hero h1{font-size:clamp(2.7rem,6vw,5.5rem);line-height:1.1;margin:14px 0}.meta{display:flex;gap:12px;color:var(--muted);font-size:.85rem;flex-wrap:wrap}.article-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:50px}.article-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px}.action-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 12px;border-radius:999px;text-decoration:none;cursor:pointer}.action-btn svg{width:16px}.action-btn.saved{color:var(--accent);border-color:var(--accent)}.article-content{font-size:1.15rem}.article-content h2{font-size:2rem;margin-top:2.4em}.article-content h3{font-size:1.5rem;margin-top:2em}.article-content img{max-width:100%;height:auto;border-radius:16px;cursor:zoom-in}.article-content figcaption{color:var(--muted);font-size:.85rem;margin-top:7px}.sidebar{display:flex;flex-direction:column;gap:18px}.side-box{padding:22px;background:var(--surface);border:1px solid var(--border);border-radius:18px;position:sticky;top:95px}.side-box+ .side-box{position:static}.side-box h2{font-size:1.15rem;margin-top:0}.side-box nav{display:flex;flex-direction:column;gap:8px}.side-box nav a{color:var(--muted);text-decoration:none}.side-box nav a.active{color:var(--accent)}.side-post{display:block;padding:12px 0;border-top:1px solid var(--border);text-decoration:none}.side-post span{display:block;color:var(--accent);font-size:.75rem}.side-post strong{display:block;line-height:1.35}.closing{margin:70px 0;text-align:center;color:var(--muted);font-size:1.35rem}.last-posts{margin-top:40px}.last-post{display:flex;justify-content:space-between;gap:18px;padding:18px 0;border-bottom:1px solid var(--border);text-decoration:none}.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;display:flex;align-items:center;justify-content:center}.lightbox img{max-width:88vw;max-height:86vh}.lb-close,.lb-prev,.lb-next{position:absolute;border:0;background:none;color:#fff;font-size:3rem;cursor:pointer}.lb-close{top:20px;right:30px}.lb-prev{left:25px}.lb-next{right:25px}@media(max-width:900px){.article-layout{grid-template-columns:1fr}.sidebar{order:-1}.side-box{position:static!important}.article-hero-inner{padding:30px}.article-hero{min-height:360px}}@media(max-width:600px){.last-post{flex-direction:column}}
+  </style>
+</BaseLayout>

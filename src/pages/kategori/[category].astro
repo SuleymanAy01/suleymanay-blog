@@ -1,35 +1,104 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
+// Türkçe karakterleri URL dostu slug'a çeviren yardımcı fonksiyon
+function slugify(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-');
+}
+
 export async function getStaticPaths() {
+  // Sitedeki tüm sabit kategorilerin listesi
+  const defaultCategories = [
+    'Bilim',
+    'Tarih',
+    'Biyografi',
+    'Teknoloji',
+    'Felsefe',
+    'Kültür / Sanat'
+  ];
+
   const postsImport = import.meta.glob('../../content/blog/*.md', { eager: true });
   const posts = Object.values(postsImport) as any[];
 
-  // Kategorileri dinamik çıkar
-  const categories = [...new Set(posts.map((post) => post.frontmatter.category).filter(Boolean))];
+  // Blog yazılarından gelen dinamik kategorileri al
+  const dynamicCategories = posts.map((post) => post.frontmatter.category).filter(Boolean);
 
-  // İçerik tamamen boşsa build'in patlamaması için varsayılan dinamik rotalar sağla
-  if (categories.length === 0) {
-    return [
-      { params: { category: 'bilim' } },
-      { params: { category: 'tarih' } },
-      { params: { category: 'biyografi' } }
-    ];
-  }
+  // Tüm kategorileri birleştir ve mükerrer olanları temizle
+  const allCategories = [...new Set([...defaultCategories, ...dynamicCategories])];
 
-  return categories.map((category) => ({
-    params: { category: category.toLowerCase() },
-  }));
+  return allCategories.map((category) => {
+    const slug = category
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ı/g, 'i')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-');
+
+    return {
+      params: { category: slug },
+      props: { categoryName: category },
+    };
+  });
 }
 
+const { categoryName } = Astro.props;
 const { category } = Astro.params;
+
+// İlgili kategoriye ait yazıları çek
+const postsImport = import.meta.glob('../../content/blog/*.md', { eager: true });
+const allPosts = Object.values(postsImport) as any[];
+const categoryPosts = allPosts.filter(
+  (post) => slugify(post.frontmatter.category || '') === category
+);
 ---
 
-<BaseLayout title={`Kategori: ${category}`}>
-  <div class="category-wrapper" style="padding: 2rem 0;">
-    <h2 style="font-family: var(--font-serif); text-transform: capitalize;">Kategori: {category}</h2>
-    <div style="padding: 2rem; text-align: center; border: 1px dashed var(--border-color); border-radius: 8px; margin-top: 1.5rem;">
-      <p style="color: #777;">Bu kategoride henüz yayınlanmış bir içerik bulunmuyor.</p>
-    </div>
+<BaseLayout title={`Kategori: ${categoryName}`}>
+  <div class="category-wrapper" style="max-width: 800px; margin: 0 auto; padding: 2rem 0;">
+    <span style="color: var(--accent-color, #d4a359); font-style: italic; font-size: 0.9rem;">
+      Kategori Arşivi
+    </span>
+    <h1 style="font-family: var(--font-serif); font-size: 2.5rem; margin-top: 0.5rem; margin-bottom: 2rem;">
+      {categoryName}
+    </h1>
+
+    {categoryPosts.length > 0 ? (
+      <div style="display: grid; gap: 1.5rem;">
+        {categoryPosts.map((post) => (
+          <article style="border: 1px solid rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 8px;">
+            <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem;">
+              <a href={post.url} style="color: var(--text-color); text-decoration: none;">
+                {post.frontmatter.title}
+              </a>
+            </h2>
+            <p style="color: #888; font-size: 0.95rem;">{post.frontmatter.description}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div style="padding: 3rem; text-align: center; border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px;">
+        <p style="color: #888; font-style: italic;">
+          Bu kategoride henüz yayınlanmış bir yazı bulunmuyor.
+        </p>
+      </div>
+    )}
   </div>
 </BaseLayout>

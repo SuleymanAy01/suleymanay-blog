@@ -1,6 +1,6 @@
-import type { APIRoute } from 'astro';
+export const prerender = false;
 
-export const GET: APIRoute = async ({ request }) => {
+export async function GET({ request }) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
 
@@ -47,4 +47,4 @@ export const GET: APIRoute = async ({ request }) => {
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
   });
-};
+}

@@ -2,8 +2,8 @@ backend:
   name: github
   repo: SuleymanAy01/suleymanay-blog
   branch: main
-  base_url: https://api.decapcms.org
-  auth_endpoint: /auth
+  base_url: https://www.suleymanay.com
+  auth_endpoint: /api/auth
 
 media_folder: "public/uploads"
 public_folder: "/uploads"

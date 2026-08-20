@@ -1,7 +1,73 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Hakkımda">
-  <section class="about"><span class="eyebrow">Hakkımda</span><h1>Süleyman Ay</h1><p class="notice">Bu bölüm, Süleyman Ay tarafından sağlanacak gerçek bilgilerle doldurulacaktır.</p></section>
-  <style>.about{padding:80px 0;max-width:820px}.about h1{font-size:clamp(3rem,7vw,6rem);margin:10px 0 30px}.notice{padding:26px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted)}</style>
+
+<BaseLayout title="Hakkımda | Süleyman Ay">
+  <div class="about-container" style="max-width: 680px; margin: 0 auto; padding: 2rem 0;">
+    
+    <span style="color: var(--accent-color, #d4a359); font-style: italic; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+      Hakkımda
+    </span>
+    
+    <h1 style="font-family: var(--font-serif); font-size: 2.8rem; margin-bottom: 2rem; color: var(--text-color);">
+      Süleyman Ay
+    </h1>
+
+    <!-- Şiirsel Söz -->
+    <blockquote style="border-left: 2px solid var(--accent-color, #d4a359); margin: 0 0 2rem 0; padding-left: 1.2rem; font-style: italic; color: #a0a0a0; font-size: 1.15rem; line-height: 1.7;">
+      "Kelimeler, zamanın tozlu raflarında unutulan hakikatleri gün ışığına çıkaran yegâne fenerlerdir."
+    </blockquote>
+
+    <!-- Sitenin Amacı -->
+    <div style="font-size: 1.1rem; line-height: 1.8; color: var(--text-color); margin-bottom: 3rem;">
+      <p>
+        Bu dijital alan; tarihin sessiz koridorlarından bilimin sonsuz ufuklarına, biyografilerin ilham veren izlerinden insan zihninin derinliklerine uzanan kişisel bir keşif günlüğüdür. Amacım; merakın peşinden giderek edindiğim okumaları, düşünceleri ve anlam arayışlarını kelimelere dökmektir.
+      </p>
+    </div>
+
+    <!-- Sosyal Medya & İletişim Bağlantıları -->
+    <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem;">
+      <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 1rem;">
+        İletişim & Takip
+      </h3>
+      
+      <div style="display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 1rem;">
+        <a 
+          href="https://x.com/01suleymanay" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style="color: var(--accent-color, #d4a359); text-decoration: none; transition: opacity 0.2s;"
+          onmouseover="this.style.opacity='0.8'"
+          onmouseout="this.style.opacity='1'"
+        >
+          𝕏 / X (Twitter)
+        </a>
+        
+        <span style="color: #444;">•</span>
+        
+        <a 
+          href="https://instagram.com/suleymanay" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style="color: var(--accent-color, #d4a359); text-decoration: none; transition: opacity 0.2s;"
+          onmouseover="this.style.opacity='0.8'"
+          onmouseout="this.style.opacity='1'"
+        >
+          📷 Instagram
+        </a>
+        
+        <span style="color: #444;">•</span>
+        
+        <a 
+          href="mailto:hello@suleymanay.com" 
+          style="color: var(--accent-color, #d4a359); text-decoration: none; transition: opacity 0.2s;"
+          onmouseover="this.style.opacity='0.8'"
+          onmouseout="this.style.opacity='1'"
+        >
+          ✉️ hello@suleymanay.com
+        </a>
+      </div>
+    </div>
+
+  </div>
 </BaseLayout>

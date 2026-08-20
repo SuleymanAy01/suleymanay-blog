@@ -21,7 +21,7 @@ collections:
           label: "Kategori", 
           name: "category", 
           widget: "select", 
-          options: ["Bilim", "Tarih", "Biyografi"] 
+          options: ["Bilim", "Tarih", "Biyografi", "Teknoloji", "Felsefe", "Kültür / Sanat"] 
         }
       - { label: "Kısa Özet", name: "description", widget: "text" }
       - { label: "Kapak Görseli", name: "image", widget: "image", required: false }
